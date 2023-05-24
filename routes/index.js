@@ -6,6 +6,7 @@ const passport = require('../config/passport')
 const productController = require('../controllers/product-controllers')
 const userController = require('../controllers/user-controllers')
 const { generalErrorHandler } = require('../middleware/error-handler')
+const { authenticated } = require('../middleware/auth')
 
 
 router.use('/admin', admin)
@@ -17,7 +18,7 @@ router.get('/signin', userController.signInPage)
 router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
 router.get('/logout', userController.logout)
 
-router.get('/products', productController.getProduct)
+router.get('/products', authenticated, productController.getProduct)
 
 
 router.use('/', (req, res) => res.redirect('/products'))
