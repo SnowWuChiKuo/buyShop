@@ -61,6 +61,15 @@ const adminController = {
         res.redirect('/admin/products')
       })
       .catch(err => next(err))
+  },
+  deleteProduct: (req, res, next) => {
+    Product.findByPk(req.params.id)
+      .then(product => {
+        if (!product) throw new Error('找不到此產品!')
+        return product.destroy()
+      })
+      .then(() => res.redirect('/admin/products'))
+      .catch(err => next(err))
   }
 }
 
