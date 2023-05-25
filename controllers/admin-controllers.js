@@ -34,6 +34,33 @@ const adminController = {
         res.render('admin/product', { product })
       })
       .catch(err => next(err))
+  },
+  editProduct: (req, res, next) => {
+    Product.findByPk(req.params.id, { raw: true })
+      .then(product => {
+        if (!product) throw new Error('找不到此產品!')
+        res.render('admin/edit-product', { product })
+      })
+      .catch(err => next(err))
+  },
+  putProduct: (req, res, next) => {
+    const { name, price, description, image } = req.body
+    if (!name) throw new Error('請輸入產品名稱!')
+    Product.findByPk(req.params.id)
+      .then(product => {
+        if (!product) throw new Error('找不到此產品!')
+        return product.update({
+          name,
+          price,
+          description,
+          image
+        })
+      })
+      .then(() => {
+        req.flash('success_messages', '產品編輯成功!')
+        res.redirect('/admin/products')
+      })
+      .catch(err => next(err))
   }
 }
 
