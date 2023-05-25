@@ -25,6 +25,15 @@ const adminController = {
       res.redirect('/admin/products')
     })
     .catch(err => next(err))
+  },
+  getProduct: (req, res, next) => {
+    Product.findByPk(req.params.id, { raw: true })
+
+      .then(product => {
+        if (!product) throw new Error('找不到此產品!')
+        res.render('admin/product', { product })
+      })
+      .catch(err => next(err))
   }
 }
 
