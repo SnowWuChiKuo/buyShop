@@ -1,4 +1,6 @@
+const { imgurFileHandler } = require('../helpers/file-helpers')
 const { Product } = require('../models')
+
 
 const adminController = {
   getProducts: (req, res, next) => {
@@ -13,13 +15,17 @@ const adminController = {
     const { name, price, description, image } = req.body
 
     if (!name) throw new Error('產品名稱不可空白!')
+
+    const { file } = req
     
-    Product.create({
-      name,
-      price,
-      description,
-      image
-    })
+    imgurFileHandler(file)
+      .then(filePath => Product.create({
+        name,
+        price,
+        description,
+        image: filePath || null
+      }))
+    
     .then(() => {
       req.flash('success_messages', '產品創建成功!')
       res.redirect('/admin/products')
@@ -44,16 +50,22 @@ const adminController = {
       .catch(err => next(err))
   },
   putProduct: (req, res, next) => {
-    const { name, price, description, image } = req.body
+    const { name, price, description } = req.body
     if (!name) throw new Error('請輸入產品名稱!')
-    Product.findByPk(req.params.id)
-      .then(product => {
+
+    const { file } = req
+
+    Promise.all([
+      Product.findByPk(req.params.id),
+      imgurFileHandler(file)
+    ])
+      .then(([product, filePath]) => {
         if (!product) throw new Error('找不到此產品!')
         return product.update({
           name,
           price,
           description,
-          image
+          image: filePath || product.image
         })
       })
       .then(() => {
