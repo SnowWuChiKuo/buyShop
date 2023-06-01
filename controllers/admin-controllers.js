@@ -12,11 +12,16 @@ const adminController = {
       .then(products => res.render('admin/products', { products }))
       .catch(err => next(err))
   },
-  createProduct: (req, res) => {
-    return res.render('admin/create-product')
+  createProduct: (req, res, next) => {
+    Category.findAll({
+      raw: true,
+      nest: true
+    })
+    .then(categories => res.render('admin/create-product', { categories }))
+    .catch(err => next(err))
   },
   postProduct: (req, res, next) => {
-    const { name, price, description, image } = req.body
+    const { name, price, description, image, categoryId } = req.body
 
     if (!name) throw new Error('產品名稱不可空白!')
 
@@ -27,7 +32,8 @@ const adminController = {
         name,
         price,
         description,
-        image: filePath || null
+        image: filePath || null,
+        categoryId
       }))
     
     .then(() => {
@@ -50,15 +56,18 @@ const adminController = {
       .catch(err => next(err))
   },
   editProduct: (req, res, next) => {
-    Product.findByPk(req.params.id, { raw: true })
-      .then(product => {
+    return Promise.all([
+      Product.findByPk(req.params.id, { raw: true }),
+      Category.findAll({ raw: true })
+    ])
+      .then(([product, categories]) => {
         if (!product) throw new Error('找不到此產品!')
-        res.render('admin/edit-product', { product })
+        res.render('admin/edit-product', { product, categories })
       })
       .catch(err => next(err))
   },
   putProduct: (req, res, next) => {
-    const { name, price, description } = req.body
+    const { name, price, description, categoryId } = req.body
     if (!name) throw new Error('請輸入產品名稱!')
 
     const { file } = req
@@ -73,7 +82,8 @@ const adminController = {
           name,
           price,
           description,
-          image: filePath || product.image
+          image: filePath || product.image,
+          categoryId
         })
       })
       .then(() => {
