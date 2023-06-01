@@ -1,10 +1,14 @@
 const { imgurFileHandler } = require('../helpers/file-helpers')
-const { Product } = require('../models')
+const { Product, User, Category } = require('../models')
 
 
 const adminController = {
   getProducts: (req, res, next) => {
-    Product.findAll({ raw: true })
+    Product.findAll({ 
+      raw: true,
+      nest: true,
+      include: [Category]
+     })
       .then(products => res.render('admin/products', { products }))
       .catch(err => next(err))
   },
@@ -33,7 +37,11 @@ const adminController = {
     .catch(err => next(err))
   },
   getProduct: (req, res, next) => {
-    Product.findByPk(req.params.id, { raw: true })
+    Product.findByPk(req.params.id, { 
+      raw: true,
+      nest: true,
+      include: [Category]
+     })
 
       .then(product => {
         if (!product) throw new Error('找不到此產品!')
