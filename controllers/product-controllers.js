@@ -1,7 +1,7 @@
 const { Product, Category } = require('../models')
 
 const productController = {
-  getProduct: (req, res) => {
+  getProducts: (req, res) => {
     return Product.findAll({
       include: Category,
       nest: true,
@@ -16,6 +16,18 @@ const productController = {
           products: data
         })
       })
+  },
+  getProduct: (req , res, next) => {
+    return Product.findByPk(req.params.id, {
+      include: Category,
+      nest: true,
+      raw: true
+    })
+      .then(product => {
+        if (!product) throw new Error("產品未創建!")
+        res.render('product', { product })
+      })
+      .catch(err => next(err))
   }
 }
 
