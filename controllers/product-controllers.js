@@ -19,13 +19,25 @@ const productController = {
   },
   getProduct: (req , res, next) => {
     return Product.findByPk(req.params.id, {
+      include: Category
+    })
+      .then(product => {
+        if (!product) throw new Error("產品未創建!")
+        console.log(product)
+        product.increment('viewCounts')
+        res.render('product', { product: product.toJSON() })
+      })
+      .catch(err => next(err))
+  },
+  getDashboard: (req, res, next) => {
+    return Product.findByPk(req.params.id, {
       include: Category,
       nest: true,
       raw: true
     })
       .then(product => {
         if (!product) throw new Error("產品未創建!")
-        res.render('product', { product })
+        res.render('dashboard', { product })
       })
       .catch(err => next(err))
   }
