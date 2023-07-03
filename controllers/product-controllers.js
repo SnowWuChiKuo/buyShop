@@ -1,21 +1,31 @@
 const { Product, Category } = require('../models')
 
 const productController = {
-  getProducts: (req, res) => {
-    return Product.findAll({
-      include: Category,
-      nest: true,
-      raw: true
-    })
-      .then(product => {
-        const data = product.map(p => ({
+  getProducts: (req, res, next) => {
+    const categoryId = Number(req.query.categoryId) || ''
+    return Promise.all([ 
+      Product.findAll({
+        include: Category,
+        where: {
+          ...categoryId ? { categoryId } : {}
+        },
+        nest: true,
+        raw: true
+      }),
+      Category.findAll({ raw: true })
+    ]) 
+      .then(([products, categories]) => {
+        const data = products.map(p => ({
           ...p,
           description: p.description.substring(0, 50)
         }))
         return res.render('products', {
-          products: data
+          products: data,
+          categories,
+          categoryId
         })
       })
+      .catch(err => next(err))
   },
   getProduct: (req , res, next) => {
     return Product.findByPk(req.params.id, {
