@@ -43,7 +43,6 @@ const productController = {
     })
       .then(product => {
         if (!product) throw new Error("產品未創建!")
-        console.log(product)
         product.increment('viewCounts')
         res.render('product', { product: product.toJSON() })
       })

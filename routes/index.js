@@ -5,6 +5,7 @@ const passport = require('../config/passport')
 
 const productController = require('../controllers/product-controllers')
 const userController = require('../controllers/user-controllers')
+const commentController = require('../controllers/comment-controllers')
 const { generalErrorHandler } = require('../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
@@ -22,6 +23,7 @@ router.get('/products/:id/dashboard', authenticated, productController.getDashbo
 router.get('/products/:id', authenticated, productController.getProduct)
 router.get('/products', authenticated, productController.getProducts)
 
+router.post('/comment', authenticated, commentController.postComment)
 
 router.use('/', (req, res) => res.redirect('/products'))
 router.use('/', generalErrorHandler)
