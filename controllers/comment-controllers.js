@@ -2,7 +2,7 @@ const { Comment, User, Product } = require('../models')
 
 const commentController = {
   postComment: (req, res, next) => {
-    const {productId, text} = req.body
+    const { productId, text } = req.body
     const userId = req.user.id
     if (!text) throw new Error('評論未建立!')
     return Promise.all([

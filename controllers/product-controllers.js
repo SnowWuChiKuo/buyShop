@@ -1,5 +1,5 @@
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
-const { Product, Category } = require('../models')
+const { Product, Category, Comment, User } = require('../models')
 
 const productController = {
   getProducts: (req, res, next) => {
@@ -39,9 +39,12 @@ const productController = {
   },
   getProduct: (req , res, next) => {
     return Product.findByPk(req.params.id, {
-      include: Category
+      include: [
+        Category,
+        { model: Comment, include: User }
+      ]
     })
-      .then(product => {
+    .then(product => {
         if (!product) throw new Error("產品未創建!")
         product.increment('viewCounts')
         res.render('product', { product: product.toJSON() })
