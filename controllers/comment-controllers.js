@@ -22,6 +22,15 @@ const commentController = {
         res.redirect(`/products/${productId}`)
       })
       .catch(err => next(err))
+  },
+  deleteComment: (req, res, next) => {
+    return Comment.findByPk(req.params.id)
+      .then(comment => {
+        if (!comment) throw new Error('找不到此評論!')
+        return comment.destroy()
+      })
+      .then(deletedComment => res.redirect(`/products/${deletedComment.productId}`))
+      .catch(err => next(err))
   }
 }
 

@@ -23,6 +23,7 @@ router.get('/products/:id/dashboard', authenticated, productController.getDashbo
 router.get('/products/:id', authenticated, productController.getProduct)
 router.get('/products', authenticated, productController.getProducts)
 
+router.delete('/comments/:id', authenticatedAdmin, commentController.deleteComment)
 router.post('/comments', authenticated, commentController.postComment)
 
 router.use('/', (req, res) => res.redirect('/products'))
