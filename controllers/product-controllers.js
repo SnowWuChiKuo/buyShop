@@ -1,3 +1,4 @@
+const { Promise } = require('sequelize')
 const { getOffset, getPagination } = require('../helpers/pagination-helper')
 const { Product, Category, Comment, User } = require('../models')
 
@@ -61,6 +62,31 @@ const productController = {
       .then(product => {
         if (!product) throw new Error("產品未創建!")
         res.render('dashboard', { product: product.toJSON() })
+      })
+      .catch(err => next(err))
+  },
+  getFeeds: (req, res, next) => {
+    return Promise.all([
+      Product.findAll({
+        limit: 10,
+        order: [['createdAt', 'DESC']],
+        include: [Category],
+        raw: true,
+        nest: true
+      }),
+      Comment.findAll({
+        limit: 10,
+        order: [['createdAt', 'DESC']],
+        include: [User, Product],
+        raw: true,
+        nest: true
+      })
+    ])
+      .then(([products, comments]) => {
+        res.render('feeds', {
+          products,
+          comments
+        })
       })
       .catch(err => next(err))
   }
