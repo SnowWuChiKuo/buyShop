@@ -53,13 +53,14 @@ const productController = {
   },
   getDashboard: (req, res, next) => {
     return Product.findByPk(req.params.id, {
-      include: Category,
-      nest: true,
-      raw: true
+      include: [
+        Category,
+        { model: Comment, include: User }
+      ]
     })
       .then(product => {
         if (!product) throw new Error("產品未創建!")
-        res.render('dashboard', { product })
+        res.render('dashboard', { product: product.toJSON() })
       })
       .catch(err => next(err))
   }

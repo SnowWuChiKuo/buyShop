@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const admin = require('./modules/admin')
 const passport = require('../config/passport')
+const users = require('./modules/user')
 
 const productController = require('../controllers/product-controllers')
 const userController = require('../controllers/user-controllers')
@@ -11,6 +12,7 @@ const { authenticated, authenticatedAdmin } = require('../middleware/auth')
 
 
 router.use('/admin', authenticatedAdmin, admin)
+router.use('/users', authenticatedAdmin, users)
 
 router.get('/signup', userController.signUpPage)
 router.post('/signup', userController.signUp)
