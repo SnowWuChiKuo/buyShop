@@ -26,10 +26,12 @@ const productController = {
     ]) 
       .then(([products, categories]) => {
         const favoritedProductsId = req.user && req.user.FavoritedProducts.map(fr => fr.id)
+        const likedProductId = req.user && req.user.LikedProducts.map(lr => lr.id)
         const data = products.rows.map(p => ({
           ...p,
           description: p.description.substring(0, 50),
-          isFavorited: favoritedProductsId.includes(p.id)
+          isFavorited: favoritedProductsId.includes(p.id),
+          isLiked: likedProductId.includes(p.id)
         }))
         return res.render('products', {
           products: data,
@@ -45,7 +47,8 @@ const productController = {
       include: [
         Category,
         { model: Comment, include: User },
-        { model: User, as: 'FavoritedUsers' }
+        { model: User, as: 'FavoritedUsers' },
+        { model: User, as: 'LikedUsers' }
       ]
     })
     .then(product => {
@@ -54,7 +57,8 @@ const productController = {
     .then(product => {
         if (!product) throw new Error("產品未創建!")
         const isFavorited = product.FavoritedUsers.some(f => f.id === req.user.id)
-        res.render('product', { product: product.toJSON(), isFavorited })
+        const isLiked = product.LikedUsers.some(l => l.id === req.user.id)
+        res.render('product', { product: product.toJSON(), isFavorited, isLiked })
       })
       .catch(err => next(err))
   },

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Comment, Product, Favorite } = require('../models')
+const { User, Comment, Product, Favorite, Like } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../helpers/auth-helpers')
 
@@ -114,12 +114,49 @@ const userController = {
       }
     })
       .then(favorite => {
-        if (!favorite) throw new Error('未喜歡此產品!')
+        if (!favorite) throw new Error('未加入最愛此產品!')
         return favorite.destroy()
       })
       .then(() => res.redirect('back'))
       .catch(err => next(err))
 
+  },
+  addLike: (req, res, next) => {
+    const { productId } = req.params
+    return Promise.all([
+      Product.findByPk(productId),
+      Like.findOne({
+        where: {
+          userId: req.user.id,
+          productId
+        }
+      })
+    ])
+      .then(([product, like]) => {
+        if (!product) throw new Error('產品不存在!')
+        if (like) throw new Error('此產品已加入喜歡!')
+
+        return Like.create({
+          userId: req.user.id,
+          productId
+        })
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
+  },
+  removeLike: (req, res, next) => {
+    return Like.findOne({
+      where: {
+        userId: req.user.id,
+        productId: req.params.productId
+      }
+    })
+      .then(like => {
+        if (!like) throw new Error('未加入喜歡此產品!')
+        return like.destroy()
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
   }
 }
 

@@ -24,6 +24,15 @@
       <button type="submit" class="btn btn-primary">加到最愛</button>
     </form>
     {{/if}}
+    {{#if isLiked }}
+    <form action="/like/{{product.id}}?_method=DELETE" method="POST" style="display: contents;">
+      <button type="submit" class="btn btn-danger">liked</button>
+    </form>
+    {{else}}
+    <form action="/like/{{product.id}}" method="POST" style="display: contents;">
+      <button type="submit" class="btn btn-primary">like</button>
+    </form>
+    {{/if}}
   </div>
   <hr>
 </div>
