@@ -29,6 +29,9 @@ router.get('/products', authenticated, productController.getProducts)
 router.delete('/comments/:id', authenticatedAdmin, commentController.deleteComment)
 router.post('/comments', authenticated, commentController.postComment)
 
+router.post('/favorite/:productId', authenticated, userController.addFavorite)
+router.delete('/favorite/:productId', authenticatedAdmin, userController.removeFavorite)
+
 router.use('/', (req, res) => res.redirect('/products'))
 router.use('/', generalErrorHandler)
 

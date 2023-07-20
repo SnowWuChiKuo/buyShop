@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs')
-const { User, Comment, Product } = require('../models')
+const { User, Comment, Product, Favorite } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../helpers/auth-helpers')
 
@@ -82,6 +82,44 @@ const userController = {
         res.redirect(`/users/${req.params.id}`)
       })
       .catch(err => next(err))
+  },
+  addFavorite: (req, res, next) => {
+    const { productId } = req.params
+    return Promise.all([
+      Product.findByPk(productId),
+      Favorite.findOne({
+        where: {
+          userId: req.user.id,
+          productId
+        }
+      })
+    ])
+      .then(([product, favorite]) => {
+        if (!product) throw new Error('產品不存在!')
+        if (favorite) throw new Error('此產品已加入過最愛!')
+
+        return Favorite.create({
+          userId: req.user.id,
+          productId
+        })
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
+  },
+  removeFavorite: (req, res, next) => {
+    return Favorite.findOne({
+      where: {
+        userId: req.user.id,
+        productId: req.params.productId
+      }
+    })
+      .then(favorite => {
+        if (!favorite) throw new Error('未喜歡此產品!')
+        return favorite.destroy()
+      })
+      .then(() => res.redirect('back'))
+      .catch(err => next(err))
+
   }
 }
 
