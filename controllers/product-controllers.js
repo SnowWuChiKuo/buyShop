@@ -25,9 +25,11 @@ const productController = {
       Category.findAll({ raw: true })
     ]) 
       .then(([products, categories]) => {
+        const favoritedProductsId = req.user && req.user.FavoritedProducts.map(fr => fr.id)
         const data = products.rows.map(p => ({
           ...p,
-          description: p.description.substring(0, 50)
+          description: p.description.substring(0, 50),
+          isFavorited: favoritedProductsId.includes(p.id)
         }))
         return res.render('products', {
           products: data,
@@ -42,13 +44,17 @@ const productController = {
     return Product.findByPk(req.params.id, {
       include: [
         Category,
-        { model: Comment, include: User }
+        { model: Comment, include: User },
+        { model: User, as: 'FavoritedUsers' }
       ]
     })
     .then(product => {
+      return product.increment('viewCounts')
+    })
+    .then(product => {
         if (!product) throw new Error("產品未創建!")
-        product.increment('viewCounts')
-        res.render('product', { product: product.toJSON() })
+        const isFavorited = product.FavoritedUsers.some(f => f.id === req.user.id)
+        res.render('product', { product: product.toJSON(), isFavorited })
       })
       .catch(err => next(err))
   },
