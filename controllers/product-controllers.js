@@ -99,6 +99,23 @@ const productController = {
         })
       })
       .catch(err => next(err))
+  },
+  getTopProducts: (req, res, next) => {
+    return Product.findAll({
+      include: [{ model: User, as: 'FavoritedUsers' }]
+    })
+      .then(products => {
+        products = products.map(r => ({
+          ...r.dataValues,
+          description: r.dataValues.description.substring(0, 50),
+          favoritedCount: r.FavoritedUsers.length,
+          isFavorited: req.user && req.user.FavoritedProducts.map(d => d.id).includes(r.id)
+        }))
+        products.sort((a, b) => b.favoritedCount - a.favoritedCount)
+        products = products.slice(0, 10)
+        res.render('top-products', { products })
+      })
+      .catch(err => next(err))
   }
 }
 
