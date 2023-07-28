@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
-const userController = require('../../controllers/user-controllers')
-const upload = require('../../middleware/multer')
+const userController = require('../../../controllers/pages/user-controllers')
+const upload = require('../../../middleware/multer')
 
 router.get('/top', userController.getTopUsers)
 router.get('/:id/edit', userController.editUser)

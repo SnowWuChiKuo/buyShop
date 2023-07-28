@@ -1,6 +1,6 @@
 const { Promise } = require('sequelize')
-const { getOffset, getPagination } = require('../helpers/pagination-helper')
-const { Product, Category, Comment, User } = require('../models')
+const { getOffset, getPagination } = require('../../helpers/pagination-helper')
+const { Product, Category, Comment, User } = require('../../models')
 
 const productController = {
   getProducts: (req, res, next) => {

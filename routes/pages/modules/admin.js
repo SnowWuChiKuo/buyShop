@@ -1,9 +1,9 @@
 const express = require('express')
 const router = express.Router()
-const upload = require('../../middleware/multer')
+const upload = require('../../../middleware/multer')
 
-const adminController = require('../../controllers/admin-controllers')
-const categoryController = require('../../controllers/category-controllers')
+const adminController = require('../../../controllers/pages/admin-controllers')
+const categoryController = require('../../../controllers/pages/category-controllers')
 
 router.get('/products/create', adminController.createProduct)
 router.get('/products/:id/edit', adminController.editProduct)

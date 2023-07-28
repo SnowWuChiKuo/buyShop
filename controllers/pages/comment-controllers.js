@@ -1,4 +1,4 @@
-const { Comment, User, Product } = require('../models')
+const { Comment, User, Product } = require('../../models')
 
 const commentController = {
   postComment: (req, res, next) => {
