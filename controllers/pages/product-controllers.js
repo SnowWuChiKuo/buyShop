@@ -1,46 +1,9 @@
-const { Promise } = require('sequelize')
-const { getOffset, getPagination } = require('../../helpers/pagination-helper')
+const productServices = require('../../service/product-services')
 const { Product, Category, Comment, User } = require('../../models')
 
 const productController = {
   getProducts: (req, res, next) => {
-    const DEFAULT_LIMIT = 9
-    const categoryId = Number(req.query.categoryId) || ''
-
-    const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || DEFAULT_LIMIT
-    const offset = getOffset(limit, page)
-
-    return Promise.all([ 
-      Product.findAndCountAll({
-        include: Category,
-        where: {
-          ...categoryId ? { categoryId } : {}
-        },
-        limit,
-        offset,
-        nest: true,
-        raw: true
-      }),
-      Category.findAll({ raw: true })
-    ]) 
-      .then(([products, categories]) => {
-        const favoritedProductsId = req.user && req.user.FavoritedProducts.map(fr => fr.id)
-        const likedProductId = req.user && req.user.LikedProducts.map(lr => lr.id)
-        const data = products.rows.map(p => ({
-          ...p,
-          description: p.description.substring(0, 50),
-          isFavorited: favoritedProductsId.includes(p.id),
-          isLiked: likedProductId.includes(p.id)
-        }))
-        return res.render('products', {
-          products: data,
-          categories,
-          categoryId,
-          pagination: getPagination(limit, page, products.count)
-        })
-      })
-      .catch(err => next(err))
+    productServices.getProducts(req, (err, data) => err ? next(err) : res.render('products', data))    
   },
   getProduct: (req , res, next) => {
     return Product.findByPk(req.params.id, {

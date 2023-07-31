@@ -1,10 +1,47 @@
-const productServices = require('../../service/product-services')
+const { getOffset, getPagination } = require('../helpers/pagination-helper')
+const { Product, Category, Comment, User } = require('../models')
 
-const productController = {
-  getProducts: (req, res, next) => {
-    productServices.getProducts(req, (err, data) => err ? next(err) : res.json(data))
+const productServices = {
+  getProducts: (req, cb) => {
+    const DEFAULT_LIMIT = 9
+    const categoryId = Number(req.query.categoryId) || ''
+
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || DEFAULT_LIMIT
+    const offset = getOffset(limit, page)
+
+    Promise.all([
+      Product.findAndCountAll({
+        include: Category,
+        where: {
+          ...categoryId ? { categoryId } : {}
+        },
+        limit,
+        offset,
+        nest: true,
+        raw: true
+      }),
+      Category.findAll({ raw: true })
+    ])
+      .then(([products, categories]) => {
+        const favoritedProductsId = req.user?.FavoritedProducts ? req.user.FavoritedProducts.map(fr => fr.id) : []
+        const likedProductId = req.user?.LikedProducts ? req.user.LikedProducts.map(lr => lr.id) : []
+        const data = products.rows.map(p => ({
+          ...p,
+          description: p.description.substring(0, 50),
+          isFavorited: favoritedProductsId.includes(p.id),
+          isLiked: likedProductId.includes(p.id)
+        }))
+        return cb(null, {
+          products: data,
+          categories,
+          categoryId,
+          pagination: getPagination(limit, page, products.count)
+        })
+      })
+      .catch(err => cb(err))
   },
-  getProduct: (req , res, next) => {
+  getProduct: (req, res, next) => {
     return Product.findByPk(req.params.id, {
       include: [
         Category,
@@ -13,10 +50,10 @@ const productController = {
         { model: User, as: 'LikedUsers' }
       ]
     })
-    .then(product => {
-      return product.increment('viewCounts')
-    })
-    .then(product => {
+      .then(product => {
+        return product.increment('viewCounts')
+      })
+      .then(product => {
         if (!product) throw new Error("產品未創建!")
         const isFavorited = product.FavoritedUsers.some(f => f.id === req.user.id)
         const isLiked = product.LikedUsers.some(l => l.id === req.user.id)
@@ -81,4 +118,4 @@ const productController = {
   }
 }
 
-module.exports = productController
+module.exports = productServices
