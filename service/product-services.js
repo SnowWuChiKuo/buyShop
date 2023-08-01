@@ -41,7 +41,7 @@ const productServices = {
       })
       .catch(err => cb(err))
   },
-  getProduct: (req, res, next) => {
+  getProduct: (req, cb) => {
     return Product.findByPk(req.params.id, {
       include: [
         Category,
@@ -57,11 +57,11 @@ const productServices = {
         if (!product) throw new Error("產品未創建!")
         const isFavorited = product.FavoritedUsers.some(f => f.id === req.user.id)
         const isLiked = product.LikedUsers.some(l => l.id === req.user.id)
-        res.render('product', { product: product.toJSON(), isFavorited, isLiked })
+        cb(null, { product: product.toJSON(), isFavorited, isLiked })
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
-  getDashboard: (req, res, next) => {
+  getDashboard: (req, cb) => {
     return Product.findByPk(req.params.id, {
       include: [
         Category,
@@ -70,11 +70,11 @@ const productServices = {
     })
       .then(product => {
         if (!product) throw new Error("產品未創建!")
-        res.render('dashboard', { product: product.toJSON() })
+        cb(null, { product: product.toJSON() })
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
-  getFeeds: (req, res, next) => {
+  getFeeds: (req, cb) => {
     return Promise.all([
       Product.findAll({
         limit: 10,
@@ -92,14 +92,14 @@ const productServices = {
       })
     ])
       .then(([products, comments]) => {
-        res.render('feeds', {
+        cb(null, {
           products,
           comments
         })
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
-  getTopProducts: (req, res, next) => {
+  getTopProducts: (req, cb) => {
     return Product.findAll({
       include: [{ model: User, as: 'FavoritedUsers' }]
     })
@@ -112,9 +112,9 @@ const productServices = {
         }))
         products.sort((a, b) => b.favoritedCount - a.favoritedCount)
         products = products.slice(0, 10)
-        res.render('top-products', { products })
+        cb(null, { products })
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   }
 }
 

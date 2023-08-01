@@ -31,7 +31,7 @@ router.delete('/comments/:id', authenticatedAdmin, commentController.deleteComme
 router.post('/comments', authenticated, commentController.postComment)
 
 router.post('/favorite/:productId', authenticated, userController.addFavorite)
-router.delete('/favorite/:productId', authenticatedAdmin, userController.removeFavorite)
+router.delete('/favorite/:productId', authenticated, userController.removeFavorite)
 
 router.post('/like/:productId', authenticated, userController.addLike)
 router.delete('/like/:productId', authenticated, userController.removeLike)
