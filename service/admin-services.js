@@ -42,7 +42,7 @@ const adminServices = {
       })
       .catch(err => cb(err))
   },
-  getProduct: (req, res, next) => {
+  getProduct: (req, cb) => {
     Product.findByPk(req.params.id, {
       raw: true,
       nest: true,
@@ -51,22 +51,22 @@ const adminServices = {
 
       .then(product => {
         if (!product) throw new Error('找不到此產品!')
-        res.render('admin/product', { product })
+        cb(null, { product })
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
-  editProduct: (req, res, next) => {
+  editProduct: (req, cb) => {
     return Promise.all([
       Product.findByPk(req.params.id, { raw: true }),
       Category.findAll({ raw: true })
     ])
       .then(([product, categories]) => {
         if (!product) throw new Error('找不到此產品!')
-        res.render('admin/edit-product', { product, categories })
+        cb(null, { product, categories })
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
-  putProduct: (req, res, next) => {
+  putProduct: (req, cb) => {
     const { name, price, description, categoryId } = req.body
     if (!name) throw new Error('請輸入產品名稱!')
 
@@ -88,39 +88,39 @@ const adminServices = {
       })
       .then(() => {
         req.flash('success_messages', '產品編輯成功!')
-        res.redirect('/admin/products')
+        cb(null)
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
-  deleteProduct: (req, res, next) => {
+  deleteProduct: (req, cb) => {
     Product.findByPk(req.params.id)
       .then(product => {
         if (!product) throw new Error('找不到此產品!')
         return product.destroy()
       })
-      .then(() => res.redirect('/admin/products'))
-      .catch(err => next(err))
+      .then(() => cb(null))
+      .catch(err => cb(err))
   },
-  getUsers: (req, res, next) => {
+  getUsers: (req, cb) => {
     User.findAll({ raw: true })
-      .then(users => res.render('admin/users', { users }))
-      .catch(err => next(err))
+      .then(users => cb(null, { users }))
+      .catch(err => cb(err))
   },
-  patchUser: (req, res, next) => {
+  patchUser: (req, cb) => {
     return User.findByPk(req.params.id)
       .then(user => {
         if (!user) throw new Error('找不到此使用者!')
         if (user.email === 'root@example.com') {
           req.flash('error_messages', '禁止變更 root 權限!')
-          return res.redirect('back')
+          return cb(null)
         }
         return user.update({ isAdmin: !user.isAdmin })
       })
       .then(() => {
         req.flash('success_messages', '使用者變更權限成功!')
-        return res.redirect('/admin/users')
+        return cb(null)
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   }
 }
 
