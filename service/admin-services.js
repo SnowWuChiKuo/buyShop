@@ -12,15 +12,15 @@ const adminServices = {
       .then(products => cb(null, { products }))
       .catch(err => cb(err))
   },
-  createProduct: (req, res, next) => {
+  createProduct: (req, cb) => {
     Category.findAll({
       raw: true,
       nest: true
     })
-      .then(categories => res.render('admin/create-product', { categories }))
-      .catch(err => next(err))
+      .then(categories => cb(null, { categories }))
+      .catch(err => cb(err))
   },
-  postProduct: (req, res, next) => {
+  postProduct: (req, cb) => {
     const { name, price, description, image, categoryId } = req.body
 
     if (!name) throw new Error('產品名稱不可空白!')
@@ -38,9 +38,9 @@ const adminServices = {
 
       .then(() => {
         req.flash('success_messages', '產品創建成功!')
-        res.redirect('/admin/products')
+        cb(null)
       })
-      .catch(err => next(err))
+      .catch(err => cb(err))
   },
   getProduct: (req, res, next) => {
     Product.findByPk(req.params.id, {

@@ -8,34 +8,10 @@ const adminController = {
     adminServices.getProducts(req, (err, data) => err ? next(err) : res.render('admin/products', data))
   },
   createProduct: (req, res, next) => {
-    Category.findAll({
-      raw: true,
-      nest: true
-    })
-    .then(categories => res.render('admin/create-product', { categories }))
-    .catch(err => next(err))
+    adminServices.createProduct(req, (err, data) => err ? next(err) : res.render('admin/create-product', data))
   },
   postProduct: (req, res, next) => {
-    const { name, price, description, image, categoryId } = req.body
-
-    if (!name) throw new Error('產品名稱不可空白!')
-
-    const { file } = req
-    
-    imgurFileHandler(file)
-      .then(filePath => Product.create({
-        name,
-        price,
-        description,
-        image: filePath || null,
-        categoryId
-      }))
-    
-    .then(() => {
-      req.flash('success_messages', '產品創建成功!')
-      res.redirect('/admin/products')
-    })
-    .catch(err => next(err))
+    adminServices.postProduct(req, (err, data) => err ? next(err) : res.redirect('admin/products'))
   },
   getProduct: (req, res, next) => {
     Product.findByPk(req.params.id, { 
