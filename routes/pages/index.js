@@ -12,7 +12,7 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
 
 router.use('/admin', authenticatedAdmin, admin)
-router.use('/users', authenticatedAdmin, users)
+router.use('/users', authenticated, users)
 
 router.get('/signup', userController.signUpPage)
 router.post('/signup', userController.signUp)

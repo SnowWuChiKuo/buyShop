@@ -1,6 +1,5 @@
 const adminServices = require('../../service/admin-services')
 const { imgurFileHandler } = require('../../helpers/file-helpers')
-const { Product, User, Category } = require('../../models')
 
 
 const adminController = {

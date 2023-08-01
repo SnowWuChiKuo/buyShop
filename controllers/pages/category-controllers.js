@@ -1,41 +1,17 @@
-const { Category } = require('../../models')
+const categoryServices = require('../../service/category-controllers')
 
 const categoryController = {
   getCategories: (req, res, next) => {
-    return Promise.all([
-      Category.findAll({ raw: true }),
-      req.params.id ? Category.findByPk(req.params.id, { raw: true }) : null
-    ])
-    .then(([categories, category]) => {
-      res.render('admin/categories', { categories, category })
-    })
+    categoryServices.getCategories(req, (err, data) => err ? next(err) : res.render('admin/categories', data))
   },
   postCategories: (req, res, next) => {
-    const { name } = req.body
-    if (!name) throw new Error('此類別已創建!')
-    return Category.create({ name })
-      .then(() => res.redirect('/admin/categories'))
-      .catch(err => next(err))
+    categoryServices.postCategories(req, (err, data) => err ? next(err) : res.redirect('/admin/categories'))
   },
   putCategory: (req, res, next) => {
-    const { name } = req.body
-    if (!name) throw new Error('此類別已創建!')
-    return Category.findByPk(req.params.id)
-      .then(category => {
-        if (!category) throw new Error('找不到此類別!')
-        return category.update({ name })
-      })
-      .then(() => res.redirect('/admin/categories'))
-      .catch(err => next(err))
+    categoryServices.putCategory(req, (err, data) => err ? next(err) : res.redirect('/admin/categories'))
   },
   deleteCategory: (req, res, next) => {
-    return Category.findByPk(req.params.id)
-      .then(category => {
-        if (!category) throw new Error('找不到此類別!')
-        return category.destroy()
-      })
-      .then(() => res.redirect('/admin/categories'))
-      .catch(err => next(err))
+    categoryServices.deleteCategory(req, (err, data) => err ? next(err) : res.redirect('/admin/categories'))
   }
 }
 
