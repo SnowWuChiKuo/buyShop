@@ -23,7 +23,7 @@ const userController = {
     userServices.editUser(req, (err, data) => err ? next(err) : res.render('users/edit', data))
   },
   putUser: (req, res, next) => {
-    userServices.putUser(req, (err, data) => err ? next(err) : res.redirect(`/users/${req.params.id}`))
+    userServices.putUser(req, (err, data) => err ? next(err) : res.redirect('back'))
   },
   addFavorite: (req, res, next) => {
     userServices.addFavorite(req, (err, data) => err ? next(err) : res.redirect('back'))

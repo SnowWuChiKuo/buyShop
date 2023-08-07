@@ -3,124 +3,133 @@ const { Product, User, Category } = require('../models')
 
 
 const adminServices = {
-  getProducts: (req, cb) => {
-    Product.findAll({
-      raw: true,
-      nest: true,
-      include: [Category]
-    })
-      .then(products => cb(null, { products }))
-      .catch(err => cb(err))
-  },
-  createProduct: (req, cb) => {
-    Category.findAll({
-      raw: true,
-      nest: true
-    })
-      .then(categories => cb(null, { categories }))
-      .catch(err => cb(err))
-  },
-  postProduct: (req, cb) => {
-    const { name, price, description, image, categoryId } = req.body
-
-    if (!name) throw new Error('產品名稱不可空白!')
-
-    const { file } = req
-
-    imgurFileHandler(file)
-      .then(filePath => Product.create({
-        name,
-        price,
-        description,
-        image: filePath || null,
-        categoryId
-      }))
-
-      .then(() => {
-        req.flash('success_messages', '產品創建成功!')
-        cb(null)
+  getProducts: async(req, cb) => {
+    try{
+      let products = await Product.findAll({
+        raw: true,
+        nest: true,
+        include: [Category]
       })
-      .catch(err => cb(err))
+      return cb(null, { products })
+    } catch (err) {
+      cb(err)
+    }
   },
-  getProduct: (req, cb) => {
-    Product.findByPk(req.params.id, {
-      raw: true,
-      nest: true,
-      include: [Category]
-    })
-
-      .then(product => {
-        if (!product) throw new Error('找不到此產品!')
-        cb(null, { product })
+  createProduct: async(req, cb) => {
+    try {
+      let categories = await Category.findAll({
+        raw: true,
+        nest: true
       })
-      .catch(err => cb(err))
+      return cb(null, { categories })
+    } catch (err) {
+      cb(err)
+    }
   },
-  editProduct: (req, cb) => {
-    return Promise.all([
-      Product.findByPk(req.params.id, { raw: true }),
-      Category.findAll({ raw: true })
-    ])
-      .then(([product, categories]) => {
-        if (!product) throw new Error('找不到此產品!')
-        cb(null, { product, categories })
-      })
-      .catch(err => cb(err))
-  },
-  putProduct: (req, cb) => {
-    const { name, price, description, categoryId } = req.body
-    if (!name) throw new Error('請輸入產品名稱!')
-
-    const { file } = req
-
-    Promise.all([
-      Product.findByPk(req.params.id),
-      imgurFileHandler(file)
-    ])
-      .then(([product, filePath]) => {
-        if (!product) throw new Error('找不到此產品!')
-        return product.update({
+  postProduct: async(req, cb) => {
+    try {
+      const { name, price, description, image, categoryId } = req.body
+      const { file } = req
+      const filePath = imgurFileHandler(file)
+      
+      if (!name) throw new Error('產品名稱不可空白!')
+      
+      const data = await Product.create({
           name,
           price,
           description,
-          image: filePath || product.image,
+          image: filePath || null,
           categoryId
         })
-      })
-      .then(() => {
-        req.flash('success_messages', '產品編輯成功!')
-        cb(null)
-      })
-      .catch(err => cb(err))
+        req.flash('success_messages', '產品創建成功!')
+        cb(null, { data })
+    } catch (err) {
+      cb(err)
+    }
   },
-  deleteProduct: (req, cb) => {
-    Product.findByPk(req.params.id)
-      .then(product => {
-        if (!product) throw new Error('找不到此產品!')
-        return product.destroy()
+  getProduct: async(req, cb) => {
+    try {
+      let product = await Product.findByPk(req.params.id, {
+      raw: true,
+      nest: true,
+      include: [Category]
       })
-      .then(() => cb(null))
-      .catch(err => cb(err))
+      if (!product) throw new Error('找不到此產品!')
+      cb(null, { product })
+    } catch (err) {
+      cb(err)
+    }
   },
-  getUsers: (req, cb) => {
-    User.findAll({ raw: true })
-      .then(users => cb(null, { users }))
-      .catch(err => cb(err))
+  editProduct: async(req, cb) => {
+    try {
+      let product = await Product.findByPk(req.params.id, { raw: true })
+      let categories = await Category.findAll({ raw: true })
+      
+      if (!product) throw new Error('找不到此產品!')
+      
+      cb(null, { product, categories })
+    } catch (err) {
+      cb(err)
+    }
   },
-  patchUser: (req, cb) => {
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) throw new Error('找不到此使用者!')
-        if (user.email === 'root@example.com') {
-          req.flash('error_messages', '禁止變更 root 權限!')
+  putProduct: async(req, cb) => {
+    try {
+      const { name, price, description, categoryId } = req.body
+      
+      if (!name) throw new Error('請輸入產品名稱!')
+      
+      const { file } = req
+  
+      let product = await Product.findByPk(req.params.id)
+      let filePath = imgurFileHandler(file)
+      if (!product) throw new Error('找不到此產品!')
+      const data = await product.update({
+            name,
+            price,
+            description,
+            image: filePath || product.image,
+            categoryId
+          })
+      req.flash('success_messages', '產品編輯成功!')
+      cb(null, {data})
+    } catch (err) {
+      cb(err)
+    }
+  },
+  deleteProduct: async(req, cb) => {
+    try {
+      const product = await Product.findByPk(req.params.id)
+        
+      if (!product) throw new Error('找不到此產品!')
+
+      await product.destroy()
+      cb(null)
+    } catch (err) {
+      cb(err)
+    }
+  },
+  getUsers: async(req, cb) => {
+    try {
+      let users = await User.findAll({ raw: true })
+        cb(null, { users })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  patchUser: async(req, cb) => {
+    try {
+      let user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('找不到此使用者!')
+      if (user.email === 'root@example.com') {
+        req.flash('error_messages', '禁止變更 root 權限!')
           return cb(null)
-        }
-        return user.update({ isAdmin: !user.isAdmin })
-      })
-      .then(() => {
-        req.flash('success_messages', '使用者變更權限成功!')
-        return cb(null)
-      })
-      .catch(err => cb(err))
+      }
+      await user.update({ isAdmin: !user.isAdmin })
+      req.flash('success_messages', '使用者變更權限成功!')
+      cb(null, { user })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 

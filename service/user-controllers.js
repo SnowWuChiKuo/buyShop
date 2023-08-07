@@ -7,29 +7,29 @@ const userServices = {
   signUpPage: (req, cb) => {
     cb(null)
   },
-  signUp: (req, cb) => {
-    const { name, email, password, passwordCheck } = req.body
+  signUp: async(req, cb) => {
+    try {
+      const { name, email, password, passwordCheck } = req.body
+  
+      if (!name || !email || !password || !passwordCheck) throw new Error('欄位不可以空白!')
+  
+      if (password !== passwordCheck) throw new Error('密碼與確認密碼不同!')
+  
+      const user = await User.findOne({ where: { email } })
 
-    if (!name || !email || !password || !passwordCheck) throw new Error('欄位不可以空白!')
+      if (user) throw new Error('帳號或信箱已有人使用了!')
 
-    if (password !== passwordCheck) throw new Error('密碼與確認密碼不同!')
+      const hash = await bcrypt.hash(req.body.password, 10)
 
-    User.findOne({ where: { email } })
-      .then(user => {
-        if (user) throw new Error('帳號或信箱已有人使用了!')
-
-        return bcrypt.hash(req.body.password, 10)
-      })
-      .then(hash => User.create({
-        name,
-        email,
-        password: hash
-      }))
-      .then(() => {
-        req.flash('success_messages', '成功註冊帳號!')
-        cb(null)
-      })
-      .catch(err => cb(err))
+      const data = User.create({
+          name,
+          email,
+          password: hash})
+      req.flash('success_messages', '成功註冊帳號!')
+      cb(null, data)
+    } catch (err) {
+      cb(err)
+    }
   },
   signInPage: (req, cb) => {
     cb(null)
@@ -43,171 +43,187 @@ const userServices = {
     req.logout()
     cb(null)
   },
-  getUser: (req, cb) => {
-    const currentUser = getUser(req)
-    return User.findByPk(req.params.id, {
-      include: [{ model: Comment, include: Product }]
-    })
-      .then(user => {
-        if (!user) throw new Error('使用者不存在!')
-        return cb(null, { currentUser, user })
+  getUser: async(req, cb) => {
+    try {
+      const currentUser = getUser(req)
+      const user = await User.findByPk(req.params.id, {
+        include: [{ model: Comment, include: Product }]
       })
-      .catch(err => cb(err))
+      if (!user) throw new Error('使用者不存在!')
+      cb(null, { currentUser, user })
+    } catch (err) {
+      cb(err)
+    }
   },
-  editUser: (req, cb) => {
-    return User.findByPk(req.params.id)
-      .then(user => {
-        if (!user) throw new Error('使用者不存在!')
-        user = user.toJSON()
-        return cb(null, { user })
+  editUser: async(req, cb) => {
+    try {
+      const user = await User.findByPk(req.params.id)
+      if (!user) throw new Error('使用者不存在!')
+      user = user.toJSON()
+      cb(null, { user })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  putUser: async(req, cb) => {
+    try {
+      const { name } = req.body
+      const { file } = req
+      const [user, filePath] = await Promise.all([
+        User.findByPk(req.params.id),
+        imgurFileHandler(file)
+      ])
+
+      if (!user) throw new Error('使用者不存在!')
+      const data =  user.update({
+        name: name || user.image,
+        image: filePath || user.image
       })
-      .catch(err => cb(err))
+      req.flash('success_messages', '使用者資料編輯成功!')
+      cb(null, data)
+    } catch (err) {
+      cb(err)
+    }
   },
-  putUser: (req, cb) => {
-    const { name } = req.body
-    const { file } = req
-    return Promise.all([
-      User.findByPk(req.params.id),
-      imgurFileHandler(file)
-    ])
-      .then(([user, filePath]) => {
-        if (!user) throw new Error('使用者不存在!')
-        return user.update({
-          name: name || user.image,
-          image: filePath || user.image
+  addFavorite: async(req, cb) => {
+    try {
+      const { productId } = req.params
+      let [product, favorite] = await Promise.all([
+        Product.findByPk(productId),
+        Favorite.findOne({
+          where: {
+            userId: req.user.id,
+            productId
+          }
         })
+      ])
+      if (!product) throw new Error('產品不存在!')
+      if (favorite) throw new Error('此產品已加入過最愛!')
+
+      const data = await Favorite.create({
+        userId: req.user.id,
+        productId
       })
-      .then(() => {
-        req.flash('success_messages', '使用者資料編輯成功!')
-        cb(null)
-      })
-      .catch(err => cb(err))
+      cb(null, { data })
+    } catch (err) {
+      cb(err)
+    }
   },
-  addFavorite: (req, cb) => {
-    const { productId } = req.params
-    return Promise.all([
-      Product.findByPk(productId),
-      Favorite.findOne({
+  removeFavorite: async(req, cb) => {
+    try {
+      const favorite = await Favorite.findOne({
         where: {
           userId: req.user.id,
-          productId
+          productId: req.params.productId
         }
       })
-    ])
-      .then(([product, favorite]) => {
-        if (!product) throw new Error('產品不存在!')
-        if (favorite) throw new Error('此產品已加入過最愛!')
+      if (!favorite) throw new Error('未加入最愛此產品!')
+      const data = await favorite.destroy()
+      cb(null, { data })
+    } catch (err) {
+      cb(err)
+    }
 
-        return Favorite.create({
-          userId: req.user.id,
-          productId
+  },
+  addLike: async(req, cb) => {
+    try {
+      const { productId } = req.params
+      let [product, like] = await Promise.all([
+        Product.findByPk(productId),
+        Like.findOne({
+          where: {
+            userId: req.user.id,
+            productId
+          }
         })
-      })
-      .then(() => cb(null))
-      .catch(err => cb(err))
-  },
-  removeFavorite: (req, cb) => {
-    return Favorite.findOne({
-      where: {
-        userId: req.user.id,
-        productId: req.params.productId
-      }
-    })
-      .then(favorite => {
-        if (!favorite) throw new Error('未加入最愛此產品!')
-        return favorite.destroy()
-      })
-      .then(() => cb(null))
-      .catch(err => cb(err))
+      ])
 
+      if (!product) throw new Error('產品不存在!')
+      if (like) throw new Error('此產品已加入喜歡!')
+
+      const data = await Like.create({
+        userId: req.user.id,
+        productId
+      })
+      cb(null, { data })
+    } catch (err) {
+      cb(err)
+    }
   },
-  addLike: (req, cb) => {
-    const { productId } = req.params
-    return Promise.all([
-      Product.findByPk(productId),
-      Like.findOne({
+  removeLike: async(req, cb) => {
+    try {
+      const like = await Like.findOne({
         where: {
           userId: req.user.id,
-          productId
+          productId: req.params.productId
         }
       })
-    ])
-      .then(([product, like]) => {
-        if (!product) throw new Error('產品不存在!')
-        if (like) throw new Error('此產品已加入喜歡!')
 
-        return Like.create({
-          userId: req.user.id,
-          productId
+      if (!like) throw new Error('未加入喜歡此產品!')
+      const data = await like.destroy()
+
+      cb(null, { data })
+      } catch (err) {
+        cb(err)
+    }
+  },
+  getTopUsers: async(req, cb) => {
+    try {
+      let users = await User.findAll({
+        include: [{ model: User, as: 'Followers' }]
+      })
+
+      users = users.map(user => ({
+        ...user.toJSON(),
+        followerCount: user.Followers.length,
+        isFollowed: req.user.Followings.some(f => f.id === user.id)
+      }))
+      users = users.sort((a, b) => b.followerCount - a.followerCount)
+      cb(null, { users })
+    } catch (err) {
+      cb(err)
+    }
+  },
+  addFollowing: async(req, cb) => {
+    try {
+      const { userId } = req.params
+      const [user, followship] = await Promise.all([
+        User.findByPk(userId),
+        Followship.findOne({
+          where: {
+            followerId: req.user.id,
+            followingId: req.params.userId
+          }
         })
+      ])
+      
+      if (!user) throw new Error('找不到使用者!')
+      if (followship) throw new Error('已經追蹤過此使用者!')
+      const data = await Followship.create({
+        followerId: req.user.id,
+        followingId: userId
       })
-      .then(() => cb(null))
-      .catch(err => cb(err))
+      
+      cb(null, { data })
+    } catch (err) {
+      cb(err)
+    }
   },
-  removeLike: (req, cb) => {
-    return Like.findOne({
-      where: {
-        userId: req.user.id,
-        productId: req.params.productId
-      }
-    })
-      .then(like => {
-        if (!like) throw new Error('未加入喜歡此產品!')
-        return like.destroy()
-      })
-      .then(() => cb(null))
-      .catch(err => cb(err))
-  },
-  getTopUsers: (req, cb) => {
-    return User.findAll({
-      include: [{ model: User, as: 'Followers' }]
-    })
-      .then(users => {
-        users = users.map(user => ({
-          ...user.toJSON(),
-          followerCount: user.Followers.length,
-          isFollowed: req.user.Followings.some(f => f.id === user.id)
-        }))
-        users = users.sort((a, b) => b.followerCount - a.followerCount)
-        cb(null, { users: users })
-      })
-      .catch(err => cb(err))
-  },
-  addFollowing: (req, cb) => {
-    const { userId } = req.params
-    Promise.all([
-      User.findByPk(userId),
-      Followship.findOne({
+  removeFollowing: async(req, cb) => {
+    try {
+      const followship = await Followship.findOne({
         where: {
           followerId: req.user.id,
           followingId: req.params.userId
         }
       })
-    ])
-      .then(([user, followship]) => {
-        if (!user) throw new Error('找不到使用者!')
-        if (followship) throw new Error('已經追蹤過此使用者!')
-        return Followship.create({
-          followerId: req.user.id,
-          followingId: userId
-        })
-      })
-      .then(() => cb(null))
-      .catch(err => cb(err))
-  },
-  removeFollowing: (req, cb) => {
-    Followship.findOne({
-      where: {
-        followerId: req.user.id,
-        followingId: req.params.userId
-      }
-    })
-      .then(followship => {
-        if (!followship) throw new Error('未追蹤過此使用者!')
-        return followship.destroy()
-      })
-      .then(() => cb(null))
-      .catch(err => cb(err))
+
+      if (!followship) throw new Error('未追蹤過此使用者!')
+      const data = await followship.destroy()
+      cb(null, { data })
+    } catch (err) {
+      cb(err)
+    }
   }
 }
 

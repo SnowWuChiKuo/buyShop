@@ -7,7 +7,7 @@
       <th scope="col">Name</th>
       <th scope="col">Email</th>
       <th scope="col">Role</th>
-      <th scope="col">Switch Role</th>
+      <th scope="col">#</th>
     </tr>
   </thead>
   <tbody>
@@ -24,10 +24,17 @@
         {{/if}}
       </td>
       <td>
-        <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST">
-          <button type="submit" class="btn btn-link" style="text-decoration:none;">
-            {{#if this.isAdmin}}set as user{{else}}set as admin{{/if}}
-          </button>
+        {{#if this.isAdmin}}
+        <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
+          <input type="hidden" name="isAdmin" value="false" />
+          <button type="submit" class="btn btn-link link-danger">Set as User</button>
+        </form>
+        {{else}}
+        <form action="/admin/users/{{this.id}}?_method=PATCH" method="POST" style="display: inline;">
+          <input type="hidden" name="isAdmin" value="true" />
+          <button type="submit" class="btn btn-link link-danger">Set as Admin</button>
+        </form>
+        {{/if}}
       </td>
     </tr>
     {{/each}}
