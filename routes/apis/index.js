@@ -7,6 +7,7 @@ const users = require('./modules/user')
 const productController = require('../../controllers/apis/product-controllers')
 const userController = require('../../controllers/apis/user-controllers')
 const commentController = require('../../controllers/apis/comment-controllers')
+const { apiErrorHandler } = require('../../middleware/error-handler')
 const { generalErrorHandler } = require('../../middleware/error-handler')
 const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 
@@ -14,12 +15,12 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 router.use('/admin', admin)
 router.use('/users', users)
 
-router.get('/signup', userController.signUpPage)
-router.post('/signup', userController.signUp)
+// router.get('/signup', userController.signUpPage)
+// router.post('/signup', userController.signUp)
 
-router.get('/signin', userController.signInPage)
-router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
-router.get('/logout', userController.logout)
+// router.get('/signin', userController.signInPage)
+// router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
+// router.get('/logout', userController.logout)
 
 router.get('/products/top', productController.getTopProducts)
 router.get('/products/feeds', productController.getFeeds)
@@ -40,6 +41,7 @@ router.post('/following/:userId', userController.addFollowing)
 router.delete('/following/:userId', userController.removeFollowing)
 
 router.use('/', (req, res) => res.redirect('/products'))
+router.use('/', apiErrorHandler)
 router.use('/', generalErrorHandler)
 
 module.exports = router

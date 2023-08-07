@@ -30,8 +30,7 @@ const adminServices = {
     try {
       const { name, price, description, image, categoryId } = req.body
       const { file } = req
-      const filePath = imgurFileHandler(file)
-      
+      const filePath = await imgurFileHandler(file)
       if (!name) throw new Error('產品名稱不可空白!')
       
       const data = await Product.create({
@@ -41,8 +40,8 @@ const adminServices = {
           image: filePath || null,
           categoryId
         })
-        req.flash('success_messages', '產品創建成功!')
-        cb(null, { data })
+      req.flash('success_messages', '產品創建成功!')
+      cb(null, { data })
     } catch (err) {
       cb(err)
     }
@@ -102,8 +101,8 @@ const adminServices = {
         
       if (!product) throw new Error('找不到此產品!')
 
-      await product.destroy()
-      cb(null)
+      const data = await product.destroy()
+      cb(null, { data })
     } catch (err) {
       cb(err)
     }
