@@ -35,18 +35,9 @@ const userServices = {
   signInPage: (req, cb) => {
     cb(null)
   },
-  signIn: async(req, res) => {
-    // try {
-    //   const userData = await req.user.toJSON()
-    //   delete userData.password
-    //   const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
-    //   const data = { token, user: userData }
-    //   console.log(data)
-    //   // req.flash('success_messages', '成功登入!')
-    //   res.json({data})
-    // } catch (err) {
-    //   cb(err)
-    // }
+  signIn: (req, cb) => {
+    req.flash('success_messages', '成功登入！')
+    cb(null)
   },
   logout: (req, cb) => {
     req.flash('success_messages', '登出成功!')
