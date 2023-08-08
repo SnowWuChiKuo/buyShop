@@ -11,14 +11,13 @@ module.exports = {
 
     let response = await fetch(url)
     let data = await response.json()
-
     const products = []
-    for (let i = 0; i < 10; i++){
+    for (let i = 0; i < 20; i++){
       products.push({
-        name: data.title,
-        price: data.price,
-        description: data.description,
-        image: data.image,
+        name: data[i].title,
+        price: data[i].price,
+        description: data[i].description,
+        image: data[i].image,
         created_at: new Date(),
         updated_at: new Date(),
         category_id: categories[Math.floor(Math.random()* categories.length)].id
