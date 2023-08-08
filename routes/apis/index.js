@@ -9,11 +9,11 @@ const userController = require('../../controllers/apis/user-controllers')
 const commentController = require('../../controllers/apis/comment-controllers')
 const { apiErrorHandler } = require('../../middleware/error-handler')
 const { generalErrorHandler } = require('../../middleware/error-handler')
-const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
+const { authenticated, authenticatedAdmin } = require('../../middleware/api-auth')
 
 
-router.use('/admin', admin)
-router.use('/users', users)
+router.use('/admin', authenticated, admin)
+router.use('/users', authenticated, users)
 
 router.get('/signup', userController.signUpPage)
 router.post('/signup', userController.signUp)

@@ -18,7 +18,7 @@ const userController = {
       delete userData.password
       const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
       const data = { token, user: userData }
-      console.log(data)
+      // console.log(data)
       // req.flash('success_messages', '成功登入!')
       res.json({ status: 'success', data })
     } catch (err) {
