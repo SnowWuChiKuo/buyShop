@@ -27,7 +27,7 @@ const userServices = {
           email,
           password: hash})
       req.flash('success_messages', '成功註冊帳號!')
-      cb(null, { data })
+      cb(null, data )
     } catch (err) {
       cb(err)
     }

@@ -10,6 +10,7 @@ const adminServices = {
         nest: true,
         include: [Category]
       })
+      console.log(req.user)
       return cb(null, { products })
     } catch (err) {
       cb(err)
