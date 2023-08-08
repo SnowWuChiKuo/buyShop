@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const { User, Comment, Product, Favorite, Like, Followship } = require('../models')
 const { imgurFileHandler } = require('../helpers/file-helpers')
 const { getUser } = require('../helpers/auth-helpers')
@@ -26,7 +27,7 @@ const userServices = {
           email,
           password: hash})
       req.flash('success_messages', '成功註冊帳號!')
-      cb(null, data)
+      cb(null, { data })
     } catch (err) {
       cb(err)
     }
@@ -34,9 +35,18 @@ const userServices = {
   signInPage: (req, cb) => {
     cb(null)
   },
-  signIn: (req, cb) => {
-    req.flash('success_messages', '成功登入!')
-    cb(null)
+  signIn: async(req, res) => {
+    // try {
+    //   const userData = await req.user.toJSON()
+    //   delete userData.password
+    //   const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+    //   const data = { token, user: userData }
+    //   console.log(data)
+    //   // req.flash('success_messages', '成功登入!')
+    //   res.json({data})
+    // } catch (err) {
+    //   cb(err)
+    // }
   },
   logout: (req, cb) => {
     req.flash('success_messages', '登出成功!')
@@ -80,7 +90,7 @@ const userServices = {
         image: filePath || user.image
       })
       req.flash('success_messages', '使用者資料編輯成功!')
-      cb(null, data)
+      cb(null, { data })
     } catch (err) {
       cb(err)
     }

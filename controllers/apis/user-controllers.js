@@ -1,4 +1,5 @@
 const userServices = require('../../service/user-controllers')
+const jwt = require('jsonwebtoken')
 
 const userController = {
   signUpPage: (req, res, next) => {
@@ -10,10 +11,21 @@ const userController = {
   signInPage: (req, res) => {
     userServices.signInPage(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
-  signIn: (req, res) => {
-    userServices.signIn(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+  signIn: async(req, res, next) => {
+    // userServices.signIn(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
+    try {
+      const userData = await req.user.toJSON()
+      delete userData.password
+      const token = jwt.sign(userData, process.env.JWT_SECRET, { expiresIn: '30d' })
+      const data = { token, user: userData }
+      console.log(data)
+      // req.flash('success_messages', '成功登入!')
+      res.json({ status: 'success', data })
+    } catch (err) {
+      next(err)
+    }
   },
-  logout: (req, res) => {
+  logout: (req, res, next) => {
     userServices.logout(req, (err, data) => err ? next(err) : res.json({ status: 'success', data }))
   },
   getUser: (req, res, next) => {

@@ -15,12 +15,12 @@ const { authenticated, authenticatedAdmin } = require('../../middleware/auth')
 router.use('/admin', admin)
 router.use('/users', users)
 
-// router.get('/signup', userController.signUpPage)
-// router.post('/signup', userController.signUp)
+router.get('/signup', userController.signUpPage)
+router.post('/signup', userController.signUp)
 
-// router.get('/signin', userController.signInPage)
-// router.post('/signin', passport.authenticate('local', { failureRedirect: '/signin', failureFlash: true }), userController.signIn)
-// router.get('/logout', userController.logout)
+router.get('/signin', userController.signInPage)
+router.post('/signin', passport.authenticate('local', { session: false }), userController.signIn)
+router.get('/logout', userController.logout)
 
 router.get('/products/top', productController.getTopProducts)
 router.get('/products/feeds', productController.getFeeds)
