@@ -47,21 +47,21 @@ const userServices = {
   getUser: async(req, cb) => {
     try {
       const currentUser = getUser(req)
-      const user = await User.findByPk(req.params.id, {
+      console.log(currentUser)
+      let user = await User.findByPk(req.params.id, {
         include: [{ model: Comment, include: Product }]
       })
       if (!user) throw new Error('使用者不存在!')
-      cb(null, { currentUser, user })
+      cb(null, { currentUser, user: user.toJSON() })
     } catch (err) {
       cb(err)
     }
   },
   editUser: async(req, cb) => {
     try {
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id, { raw: true })
       if (!user) throw new Error('使用者不存在!')
-      user = user.toJSON()
-      cb(null, { user })
+      cb(null, user)
     } catch (err) {
       cb(err)
     }

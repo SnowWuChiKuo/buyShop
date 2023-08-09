@@ -67,16 +67,15 @@ const userController = {
         include: [{ model: Comment, include: Product }]
       })
       if (!user) throw new Error('使用者不存在!')
-      cb(null, { currentUser, user })
+      cb(null, { currentUser, user: user.toJSON() })
     } catch (err) {
       cb(err)
     }
   },
   editUser: async (req, cb) => {
     try {
-      const user = await User.findByPk(req.params.id)
+      const user = await User.findByPk(req.params.id, { raw: true })
       if (!user) throw new Error('使用者不存在!')
-      user = user.toJSON()
       cb(null, { user })
     } catch (err) {
       cb(err)

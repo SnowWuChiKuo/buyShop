@@ -11,6 +11,7 @@ const passport = require('./config/passport')
 const { getUser } = require('./helpers/auth-helpers')
 const handlebarsHelpers = require('./helpers/handlebars-helpers')
 const methodOverride = require('method-override')
+const cors = require('cors')
 
 
 const app = express()
@@ -32,6 +33,8 @@ app.use((req, res, next) => {
   res.locals.user = getUser(req)
   next()
 })
+
+app.use(cors())
 
 app.use('/api', apis)
 app.use(pages)
