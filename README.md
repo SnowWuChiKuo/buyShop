@@ -11,8 +11,6 @@
 5. 使用者可以瀏覽其他產品介紹頁面，瀏覽顧客的歷史評論、追蹤中的使用者及追蹤該名使用者的清單。  
 6. 後台管理者可以瀏覽所有使用者以及所有產品的，並且管理者能夠刪除評論。  
 7. 所有使用者的帳號密碼經過雜湊處理存入資料庫，以提高安全性。  
-## AWS 部屬
-[AWS]()  
 ## 專案開發人員
 [Snow](https://github.com/SnowWuChiKuo)  
 
@@ -96,10 +94,3 @@ passport-jwt: v4.0.0
 passport-local: v1.0.0  
 sequelize: v6.18.0  
 sequelize-cli": v5.5.0  
-sinon: v9.2.0  
-sinon-chai: v3.3.0  
-eslint: v7.32.0  
-eslint-config-standard: v16.0.3  
-eslint-plugin-import: v2.23.4  
-eslint-plugin-node: v11.1.0  
-eslint-plugin-promise: v5.1.0  
