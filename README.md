@@ -14,6 +14,9 @@
 ## 專案開發人員
 [Snow](https://github.com/SnowWuChiKuo)  
 
+## AWS
+[AWS](http://buyshop-dev.ap-northeast-1.elasticbeanstalk.com/products)
+
 ## 專案本地安裝流程
 1. 請確認電腦已經安裝 Node.js 、 npm 與 Mysql Workbench  
 2. 打開終端機，輸入以下指令將此專案 clone 到本地  
