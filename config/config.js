@@ -1,4 +1,4 @@
-{
+module.exports = {
   "development": {
     "username": "root",
     "password": "password",
@@ -15,11 +15,7 @@
     "operatorsAliases": false
   },
   "production": {
-    "username": "root",
-    "password": null,
-    "database": "database_production",
-    "host": "127.0.0.1",
-    "dialect": "mysql",
+    "use_env_variable": "PROD_DATABASE_URL",
     "operatorsAliases": false
   }
 }
